@@ -1,0 +1,65 @@
+/* Custom Styling for Smart Library OS */
+
+/* Smooth custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Sidebar navigation buttons */
+.nav-btn {
+  color: #94a3b8;
+}
+.nav-btn:hover {
+  color: #f8fafc;
+  background-color: rgba(255, 255, 255, 0.06);
+}
+.nav-btn.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+/* Modal animation */
+.modal-backdrop {
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+.modal-backdrop.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.modal-backdrop:not(.hidden) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Toast styling */
+.toast {
+  pointer-events: auto;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Card hover animation */
+.book-card, .member-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.book-card:hover, .member-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+}

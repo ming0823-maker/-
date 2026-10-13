@@ -1,0 +1,156 @@
+[
+  {
+    "id": "SEAT-A01",
+    "name": "A-01",
+    "zone": "靜音自習區",
+    "type": "個人自習席",
+    "features": [
+      "電源插座",
+      "獨立檯燈",
+      "靜音區"
+    ],
+    "status": "available",
+    "currentReservationId": null
+  },
+  {
+    "id": "SEAT-A02",
+    "name": "A-02",
+    "zone": "靜音自習區",
+    "type": "個人自習席",
+    "features": [
+      "電源插座",
+      "獨立檯燈",
+      "靠窗景觀"
+    ],
+    "status": "available",
+    "currentReservationId": null
+  },
+  {
+    "id": "SEAT-A03",
+    "name": "A-03",
+    "zone": "靜音自習區",
+    "type": "個人自習席",
+    "features": [
+      "電源插座",
+      "獨立檯燈",
+      "靜音區"
+    ],
+    "status": "occupied",
+    "currentReservationId": "RES-4002"
+  },
+  {
+    "id": "SEAT-A04",
+    "name": "A-04",
+    "zone": "靜音自習區",
+    "type": "個人自習席",
+    "features": [
+      "電源插座",
+      "獨立檯燈",
+      "靠窗景觀"
+    ],
+    "status": "available",
+    "currentReservationId": null
+  },
+  {
+    "id": "SEAT-A05",
+    "name": "A-05",
+    "zone": "靜音自習區",
+    "type": "個人自習席",
+    "features": [
+      "電源插座",
+      "獨立檯燈"
+    ],
+    "status": "available",
+    "currentReservationId": null
+  },
+  {
+    "id": "SEAT-A06",
+    "name": "A-06",
+    "zone": "靜音自習區",
+    "type": "個人自習席",
+    "features": [
+      "電源插座",
+      "獨立檯燈"
+    ],
+    "status": "available",
+    "currentReservationId": null
+  },
+  {
+    "id": "SEAT-B01",
+    "name": "B-01",
+    "zone": "電腦檢索區",
+    "type": "雙螢幕電腦席",
+    "features": [
+      "高階主機",
+      "雙螢幕",
+      "電子資源檢索"
+    ],
+    "status": "occupied",
+    "currentReservationId": "RES-4003"
+  },
+  {
+    "id": "SEAT-B02",
+    "name": "B-02",
+    "zone": "電腦檢索區",
+    "type": "雙螢幕電腦席",
+    "features": [
+      "高階主機",
+      "雙螢幕",
+      "電子資源檢索"
+    ],
+    "status": "available",
+    "currentReservationId": null
+  },
+  {
+    "id": "SEAT-B03",
+    "name": "B-03",
+    "zone": "電腦檢索區",
+    "type": "論文編修席",
+    "features": [
+      "雙螢幕",
+      "統計軟體SPSS/Python",
+      "專業鍵盤"
+    ],
+    "status": "available",
+    "currentReservationId": null
+  },
+  {
+    "id": "SEAT-B04",
+    "name": "B-04",
+    "zone": "電腦檢索區",
+    "type": "論文編修席",
+    "features": [
+      "雙螢幕",
+      "電子資料庫",
+      "掃描設備"
+    ],
+    "status": "available",
+    "currentReservationId": null
+  },
+  {
+    "id": "SEAT-C01",
+    "name": "C-01 研討室",
+    "zone": "研討與多功能區",
+    "type": "小組研討室 (4-6人)",
+    "features": [
+      "65吋投影螢幕",
+      "白板",
+      "隔音討論空間"
+    ],
+    "status": "available",
+    "currentReservationId": null
+  },
+  {
+    "id": "SEAT-C02",
+    "name": "C-02 研討室",
+    "zone": "研討與多功能區",
+    "type": "大型會議研討室 (8-12人)",
+    "features": [
+      "4K視訊會議設備",
+      "電子白板",
+      "音響擴音系統"
+    ],
+    "status": "available",
+    "currentReservationId": null
+  }
+]
