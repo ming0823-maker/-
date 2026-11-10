@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智慧圖書館作業系統 | Smart Library System</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col md:flex-row">
+
+  <!-- Sidebar Navigation -->
+  <aside class="w-full md:w-64 bg-slate-900 text-white flex flex-col shrink-0 shadow-xl z-20">
+    <!-- Brand Header -->
+    <div class="p-5 border-b border-slate-800 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30 text-xl font-bold">
+        <i class="fa-solid fa-book-bookmark"></i>
+      </div>
+      <div>
+        <h1 class="font-bold text-lg leading-tight tracking-wide text-white">智慧圖書館</h1>
+        <p class="text-xs text-slate-400 tracking-wider">作業管理系統 v1.2</p>
+      </div>
+    </div>
+
+    <!-- Current User Info Card -->
+    <div id="sidebar-user-card" class="mx-4 mt-3 p-3 bg-slate-800/90 rounded-2xl border border-slate-700/60 flex items-center justify-between gap-3 shadow-sm">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div id="sidebar-user-avatar" class="w-9 h-9 rounded-xl bg-amber-400/20 text-amber-400 border border-amber-400/30 flex items-center justify-center font-bold text-base shrink-0 shadow-inner">
+          👑
+        </div>
+        <div class="min-w-0">
+          <div id="sidebar-user-name" class="font-bold text-xs text-white truncate">ming</div>
+          <div id="sidebar-user-role" class="text-[10px] text-amber-400 font-medium truncate">全權管理者 (最高權限)</div>
+        </div>
+      </div>
+      <button onclick="openLoginModal()" title="切換帳號 / 登出" class="text-slate-400 hover:text-white hover:bg-slate-700/70 p-2 rounded-xl transition text-xs shrink-0">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="p-4 space-y-1.5 flex-1">
+      <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn active flex items-center gap-3 w-full px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200">
+        <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+        <span>儀表板總覽</span>
+      </button>
+
+      <button onclick="switchTab('circulation')" id="nav-circulation" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200">
+        <i class="fa-solid fa-arrows-rotate w-5 text-center"></i>
+        <span>借還書作業</span>
+        <span id="badge-overdue-count" class="hidden ml-auto text-xs bg-rose-500 text-white font-bold px-2 py-0.5 rounded-full">0</span>
+      </button>
+
+      <!-- NEW: 座位預約系統 -->
+      <button onclick="switchTab('seats')" id="nav-seats" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200">
+        <i class="fa-solid fa-chair w-5 text-center"></i>
+        <span>座位預約系統</span>
+        <span id="badge-seat-available" class="ml-auto text-xs bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded-full">--</span>
+      </button>
+
+      <button onclick="switchTab('books')" id="nav-books" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200">
+        <i class="fa-solid fa-book-open w-5 text-center"></i>
+        <span>藏書管理</span>
+      </button>
+
+      <button onclick="switchTab('members')" id="nav-members" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200">
+        <i class="fa-solid fa-users w-5 text-center"></i>
+        <span>讀者借閱證</span>
+      </button>
+
+      <button onclick="switchTab('loans')" id="nav-loans" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200">
+        <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i>
+        <span>借閱紀錄檢索</span>
+      </button>
+
+      <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200">
+        <i class="fa-solid fa-sliders w-5 text-center"></i>
+        <span>系統參數設定</span>
+      </button>
+
+      <!-- User Profile (My Card) -->
+      <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn hidden flex items-center gap-3 w-full px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200">
+        <i class="fa-solid fa-id-card w-5 text-center"></i>
+        <span>我的借閱證</span>
+      </button>
+    </nav>
+
+    <!-- Quick System Status Card -->
+    <div class="p-4 m-4 rounded-2xl bg-slate-800/80 border border-slate-700/60 text-xs">
+      <div class="flex items-center justify-between text-slate-300 mb-2">
+        <span class="font-medium text-emerald-400"><i class="fa-solid fa-circle text-emerald-400 text-[9px] mr-1.5 animate-pulse"></i>HTML 獨立運行中</span>
+        <span id="current-time-sidebar" class="text-slate-400 font-mono">--:--</span>
+      </div>
+      <p class="text-slate-400 leading-relaxed text-[11px]">免伺服器直接執行，所有資料即時保存於瀏覽器 LocalStorage</p>
+    </div>
+  </aside>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+    <!-- Top Bar -->
+    <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-10">
+      <div class="flex items-center gap-3">
+        <h2 id="page-title" class="text-xl font-bold text-slate-800">儀表板總覽</h2>
+        <span id="page-subtitle" class="text-xs text-slate-400 border-l border-slate-200 pl-3">全館統計與借閱狀態即時追蹤</span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+          <i class="fa-regular fa-calendar mr-2 text-slate-400"></i>
+          <span id="today-date-badge">載入中...</span>
+        </div>
+        <button onclick="refreshCurrentView()" title="重新整理" class="p-2 text-slate-500 hover:text-emerald-600 hover:bg-slate-100 rounded-lg transition">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
+
+        <!-- User Badge & Switch Account -->
+        <div class="flex items-center gap-2 pl-3 border-l border-slate-200">
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs">
+            <span id="top-user-icon">👑</span>
+            <span id="top-user-name" class="font-bold text-slate-700">ming</span>
+            <span id="top-user-badge" class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 font-bold">全權管理者</span>
+          </div>
+          <button onclick="openLoginModal()" title="切換身分 / 登出" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 border border-slate-200 transition">
+            <i class="fa-solid fa-right-from-bracket text-rose-500"></i>
+            <span class="hidden sm:inline">切換帳號</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content Sections -->
+    <div class="p-6 md:p-8 space-y-8 flex-1">
+
+      <!-- ================= 1. 儀表板總覽 (Dashboard) ================= -->
+      <section id="view-dashboard" class="space-y-6">
+        <!-- Quick Seat Status Banner -->
+        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-2xl p-5 shadow-md flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-700/60">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-2xl shadow-inner">
+              <i class="fa-solid fa-chair"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="font-bold text-base text-white">自習室與閱覽席位即時狀態</h4>
+                <span class="text-[11px] bg-emerald-500/20 text-emerald-300 font-semibold px-2 py-0.5 rounded-full border border-emerald-500/30">全新上線</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">全館提供 <span id="dash-seats-total" class="font-bold text-white">--</span> 席座位，目前在庫空閒 <span id="dash-seats-avail" class="font-bold text-emerald-400 text-sm">--</span> 席可立即預約</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-1.5 text-xs bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <span class="text-slate-300">空閒: <b id="dash-seats-avail-count" class="text-white">--</b></span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+              <span class="text-slate-300">使用中: <b id="dash-seats-occupied-count" class="text-white">--</b></span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="text-slate-300">已預約: <b id="dash-seats-reserved-count" class="text-white">--</b></span>
+            </div>
+            <button onclick="switchTab('seats')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-md shadow-emerald-600/30 flex items-center gap-1.5">
+              <span>前往席位預約</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Metric Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <!-- Total Books -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">總館藏書量</span>
+              <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-book"></i>
+              </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="stat-total-copies" class="text-3xl font-extrabold text-slate-800">--</span>
+              <span class="text-xs text-slate-400">本 (<span id="stat-total-titles">--</span> 種書目)</span>
+            </div>
+            <div class="mt-3 text-xs text-slate-500 flex items-center gap-1">
+              <i class="fa-solid fa-arrow-trend-up text-emerald-500 mr-1"></i>館藏齊全完備
+            </div>
+          </div>
+
+          <!-- Available Books -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">目前在館 (可借)</span>
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="stat-available-copies" class="text-3xl font-extrabold text-emerald-600">--</span>
+              <span class="text-xs text-slate-400">本在架可借</span>
+            </div>
+            <div class="mt-3 text-xs text-slate-500 flex items-center gap-1">
+              可借率：<span id="stat-available-percent" class="font-semibold text-slate-700">--%</span>
+            </div>
+          </div>
+
+          <!-- Borrowed Books -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">目前借出中</span>
+              <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-hand-holding-hand"></i>
+              </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="stat-borrowed-copies" class="text-3xl font-extrabold text-amber-600">--</span>
+              <span class="text-xs text-slate-400">本在外流通</span>
+            </div>
+            <div class="mt-3 text-xs text-slate-500 flex items-center gap-1">
+              有效借出中：<span id="stat-active-loans" class="font-semibold text-slate-700">--</span> 筆紀錄
+            </div>
+          </div>
+
+          <!-- Overdue Alert -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">逾期未還警示</span>
+              <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="stat-overdue-count" class="text-3xl font-extrabold text-rose-600">0</span>
+              <span class="text-xs text-slate-400">本已超過歸還日</span>
+            </div>
+            <div class="mt-3 text-xs text-rose-500 font-medium flex items-center gap-1">
+              <i class="fa-solid fa-bell mr-1"></i>需要通知讀者儘速歸還
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Category Chart -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm lg:col-span-1 flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-chart-pie text-emerald-500"></i>館藏分類分佈
+              </h3>
+            </div>
+            <div class="relative flex-1 min-h-[260px] flex items-center justify-center">
+              <canvas id="chart-categories"></canvas>
+            </div>
+          </div>
+
+          <!-- Circulation Status Chart -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm lg:col-span-2 flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-chart-column text-blue-500"></i>館藏借閱與在館狀況
+              </h3>
+              <button onclick="switchTab('circulation')" class="text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:underline">
+                前往借還作業 &rarr;
+              </button>
+            </div>
+            <div class="relative flex-1 min-h-[260px] flex items-center justify-center">
+              <canvas id="chart-circulation"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activities & Overdue Watchlist -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+          <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div>
+              <h3 class="font-bold text-slate-800">近期借閱動態</h3>
+              <p class="text-xs text-slate-400">即時監控最新的借閱與流通狀態</p>
+            </div>
+            <button onclick="switchTab('loans')" class="text-xs font-medium text-slate-600 hover:text-emerald-600">
+              檢視完整歷史清單
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+              <thead class="bg-slate-50 text-slate-400 text-xs uppercase font-semibold">
+                <tr>
+                  <th class="py-3.5 px-6">借閱單號</th>
+                  <th class="py-3.5 px-6">借閱書目</th>
+                  <th class="py-3.5 px-6">借閱讀者</th>
+                  <th class="py-3.5 px-6">借出日期</th>
+                  <th class="py-3.5 px-6">應還日期</th>
+                  <th class="py-3.5 px-6">狀態</th>
+                  <th class="py-3.5 px-6 text-right">快速操作</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-recent-loans" class="divide-y divide-slate-100">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 2. 借還書作業 (Circulation) ================= -->
+      <section id="view-circulation" class="hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- 借書作業 (Borrow Desk) -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="flex items-center gap-3 pb-4 mb-5 border-b border-slate-100">
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-arrow-up-from-bracket"></i>
+              </div>
+              <div>
+                <h3 id="circulation-desk-title" class="font-bold text-slate-800 text-base">圖書借出作業</h3>
+                <p id="circulation-desk-subtitle" class="text-xs text-slate-400">登記讀者借閱，庫存將自動扣減</p>
+              </div>
+            </div>
+
+            <form id="form-borrow" onsubmit="handleBorrowSubmit(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">選擇借閱讀者 <span class="text-rose-500">*</span></label>
+                <select id="borrow-member-select" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+                  <option value="">-- 請選擇讀者 (或輸入證號) --</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">選擇借出書籍 <span class="text-rose-500">*</span></label>
+                <select id="borrow-book-select" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+                  <option value="">-- 請選擇在館書籍 --</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">借閱天數</label>
+                <div class="flex items-center gap-3">
+                  <input type="number" id="borrow-days" value="14" min="1" max="90" class="w-28 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+                  <span class="text-xs text-slate-500">天 (預設14天，教職員最高可至30天)</span>
+                </div>
+              </div>
+
+              <div class="pt-2">
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 rounded-xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2 text-sm">
+                  <i class="fa-solid fa-check"></i>
+                  <span>確認登記借出</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- 快速還書與查詢 (Quick Return Desk) -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col">
+            <div class="flex items-center gap-3 pb-4 mb-5 border-b border-slate-100">
+              <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-arrow-down-to-bracket"></i>
+              </div>
+              <div>
+                <h3 id="circulation-table-title" class="font-bold text-slate-800 text-base">快速還書與續借作業</h3>
+                <p id="circulation-table-subtitle" class="text-xs text-slate-400">支援即時查詢還書，自動統計逾期罰款</p>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                <input type="text" id="circulation-search-input" oninput="filterActiveLoans()" placeholder="搜尋借閱中的書名、讀者姓名、證號或單號..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 focus:outline-none transition">
+              </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto max-h-[340px] pr-1 space-y-3" id="circulation-active-list">
+              <!-- Dynamically Populated -->
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-5 flex items-start gap-4">
+          <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+            <i class="fa-solid fa-lightbulb"></i>
+          </div>
+          <div class="text-xs text-amber-900 leading-relaxed">
+            <h4 class="font-bold text-amber-950 mb-1">借還書規範提醒</h4>
+            <ul class="list-disc pl-4 space-y-0.5 text-amber-800">
+              <li>學生上限 5 本，教職員上限 10 本，一般讀者上限 3 本。</li>
+              <li>每本書籍在未逾期情況下最多可續借 2 次，每次延長設定之天數。</li>
+              <li>若讀者名下有逾期未還書籍，系統將自動限制其借書權限，直至完成歸還。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= NEW: 3. 座位預約系統 (Seats) ================= -->
+      <section id="view-seats" class="hidden space-y-6">
+        <!-- Seat Metric Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold text-slate-400 uppercase">總自習席位</span>
+              <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-base">
+                <i class="fa-solid fa-chair"></i>
+              </div>
+            </div>
+            <div class="text-2xl font-extrabold text-slate-800" id="seat-stat-total">--</div>
+            <div class="text-xs text-slate-400 mt-1">涵蓋 3 大主題功能分區</div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold text-emerald-600 uppercase">目前空閒 (可預約)</span>
+              <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+            </div>
+            <div class="text-2xl font-extrabold text-emerald-600" id="seat-stat-available">--</div>
+            <div class="text-xs text-slate-400 mt-1">點擊空閒席位可直接預約</div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold text-rose-600 uppercase">讀者使用中</span>
+              <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-base">
+                <i class="fa-solid fa-user-clock"></i>
+              </div>
+            </div>
+            <div class="text-2xl font-extrabold text-rose-600" id="seat-stat-occupied">--</div>
+            <div class="text-xs text-slate-400 mt-1">已完成現場報到簽到</div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold text-amber-600 uppercase">已預約保留中</span>
+              <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-base">
+                <i class="fa-regular fa-clock"></i>
+              </div>
+            </div>
+            <div class="text-2xl font-extrabold text-amber-600" id="seat-stat-reserved">--</div>
+            <div class="text-xs text-slate-400 mt-1">等待讀者報到入座</div>
+          </div>
+        </div>
+
+        <!-- Filter & Reservation Button -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-3 w-full md:w-auto flex-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-500"><i class="fa-solid fa-filter mr-1"></i>區域分區：</span>
+              <select id="seats-zone-select" onchange="loadSeats()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+                <option value="全部">所有區域 (全部席位)</option>
+                <option value="靜音自習區">🎧 靜音自習區 (A區)</option>
+                <option value="電腦檢索區">💻 電腦檢索區 (B區)</option>
+                <option value="研討與多功能區">👥 研討與多功能區 (C區)</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-500">狀態：</span>
+              <select id="seats-status-select" onchange="loadSeats()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+                <option value="全部">全部狀態</option>
+                <option value="available">🟢 空閒可預約</option>
+                <option value="occupied">🔴 讀者使用中</option>
+                <option value="reserved">🟡 已預約待報到</option>
+              </select>
+            </div>
+          </div>
+
+          <button onclick="openSeatModal()" class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-calendar-plus"></i>
+            <span>登記預約席位</span>
+          </button>
+        </div>
+
+        <!-- Interactive Visual Seat Map Grid -->
+        <div class="space-y-6">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                <i class="fa-solid fa-border-all text-emerald-600"></i>
+                <span>館內自習座位即時互動平面圖</span>
+              </h3>
+              <div class="flex items-center gap-4 text-xs text-slate-500">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>空閒 (點擊快速預約)</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>使用中</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>已預約</span>
+              </div>
+            </div>
+
+            <div id="seats-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <!-- Dynamically populated via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Today's Reservations Table -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+          <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div>
+              <h3 class="font-bold text-slate-800 text-sm">今日座位預約與排程清單</h3>
+              <p class="text-xs text-slate-400">當日席位預約、讀者報到與簽退管理</p>
+            </div>
+            <span class="text-xs text-slate-500 font-mono" id="reservations-date-display">2026-09-15</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+              <thead class="bg-slate-50 text-slate-400 text-xs uppercase font-semibold">
+                <tr>
+                  <th class="py-3.5 px-6">預約單號</th>
+                  <th class="py-3.5 px-6">座位名稱</th>
+                  <th class="py-3.5 px-6">所屬分區</th>
+                  <th class="py-3.5 px-6">預約讀者</th>
+                  <th class="py-3.5 px-6">預約時段</th>
+                  <th class="py-3.5 px-6">狀態</th>
+                  <th class="py-3.5 px-6 text-right">操作</th>
+                </tr>
+              </thead>
+              <tbody id="seat-reservations-table-body" class="divide-y divide-slate-100">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 4. 藏書管理 (Books) ================= -->
+      <section id="view-books" class="hidden space-y-6">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-3 w-full md:w-auto flex-1">
+            <div class="relative flex-1 min-w-[240px]">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+              <input type="text" id="books-search-input" oninput="loadBooks()" placeholder="搜尋書名、作者、ISBN、出版社..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+            </div>
+
+            <select id="books-category-select" onchange="loadBooks()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+              <option value="全部">所有分類</option>
+              <option value="資訊科技">資訊科技</option>
+              <option value="心理勵志">心理勵志</option>
+              <option value="商業理財">商業理財</option>
+              <option value="文學小說">文學小說</option>
+              <option value="人文歷史">人文歷史</option>
+              <option value="自然科普">自然科普</option>
+              <option value="未分類">其他 / 未分類</option>
+            </select>
+          </div>
+
+          <button id="btn-open-add-book" onclick="openBookModal()" class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-plus"></i>
+            <span>新增館藏書籍</span>
+          </button>
+        </div>
+
+        <div id="books-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <!-- Populated via JS -->
+        </div>
+      </section>
+
+      <!-- ================= 5. 讀者管理 (Members) ================= -->
+      <section id="view-members" class="hidden space-y-6">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-3 w-full md:w-auto flex-1">
+            <div class="relative flex-1 min-w-[240px]">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+              <input type="text" id="members-search-input" oninput="loadMembers()" placeholder="搜尋姓名、證號、信箱、電話..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+            </div>
+
+            <select id="members-type-select" onchange="loadMembers()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+              <option value="全部">所有身份類型</option>
+              <option value="學生">學生</option>
+              <option value="教職員">教職員</option>
+              <option value="一般讀者">一般讀者</option>
+            </select>
+          </div>
+
+          <button onclick="openMemberModal()" class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>辦理讀者借閱證</span>
+          </button>
+        </div>
+
+        <div id="members-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <!-- Populated via JS -->
+        </div>
+      </section>
+
+      <!-- ================= 6. 借閱紀錄檢索 (Loans) ================= -->
+      <section id="view-loans" class="hidden space-y-6">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-3 w-full md:w-auto flex-1">
+            <div class="relative flex-1 min-w-[240px]">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+              <input type="text" id="loans-search-input" oninput="loadLoans()" placeholder="搜尋書名、讀者、紀錄編號..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+            </div>
+
+            <select id="loans-status-select" onchange="loadLoans()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+              <option value="all">所有借還紀錄</option>
+              <option value="active">借閱中 (含逾期)</option>
+              <option value="overdue">僅看逾期未還</option>
+              <option value="returned">已歸還歷史</option>
+            </select>
+          </div>
+
+          <button onclick="exportLoansToCSV()" class="w-full md:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium px-4 py-2.5 rounded-xl border border-slate-200 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-file-arrow-down text-emerald-600"></i>
+            <span>匯出報表 (CSV)</span>
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+              <thead class="bg-slate-50 text-slate-400 text-xs uppercase font-semibold">
+                <tr>
+                  <th class="py-3.5 px-6">借閱編號</th>
+                  <th class="py-3.5 px-6">書籍名稱</th>
+                  <th class="py-3.5 px-6">借閱讀者</th>
+                  <th class="py-3.5 px-6">借出日期</th>
+                  <th class="py-3.5 px-6">應還日期</th>
+                  <th class="py-3.5 px-6">歸還日期</th>
+                  <th class="py-3.5 px-6">狀態</th>
+                  <th class="py-3.5 px-6 text-right">操作</th>
+                </tr>
+              </thead>
+              <tbody id="loans-table-body" class="divide-y divide-slate-100">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 7. 系統設定 (Settings) ================= -->
+      <section id="view-settings" class="hidden space-y-6">
+        <div class="max-w-2xl bg-white p-6 md:p-8 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
+          <div class="pb-4 border-b border-slate-100">
+            <h3 class="font-bold text-slate-800 text-lg">系統規則與借閱參數</h3>
+            <p class="text-xs text-slate-400">自訂圖書館預設借閱天數、借書上限與逾期規則</p>
+          </div>
+
+          <form id="form-settings" onsubmit="saveSettings(event)" class="space-y-5">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">系統顯示名稱</label>
+              <input type="text" id="setting-systemName" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">預設借閱天數 (天)</label>
+                <input type="number" id="setting-maxBorrowDays" min="1" max="180" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">逾期每日滯納金 (NT$ 元/天)</label>
+                <input type="number" id="setting-finePerDay" min="0" max="100" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+              </div>
+            </div>
+
+            <div class="pt-4 flex items-center justify-between border-t border-slate-100">
+              <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-6 py-2.5 rounded-xl shadow-md shadow-emerald-600/20 transition">
+                儲存設定
+              </button>
+            </div>
+          </form>
+
+          <!-- Local Data Management for HTML standalone mode -->
+          <div class="mt-8 pt-6 border-t border-slate-200">
+            <div class="mb-4">
+              <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-database text-emerald-600"></i>
+                <span>本機資料備份與還原 (HTML 免伺服器模式)</span>
+              </h4>
+              <p class="text-xs text-slate-400 mt-0.5">系統資料儲存於瀏覽器 LocalStorage 中。您可匯出備份檔案保存或轉移至其他電腦：</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+              <button type="button" onclick="exportAllData()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-download text-emerald-600"></i>
+                <span>匯出全館資料 (JSON)</span>
+              </button>
+              <label class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition flex items-center gap-2 shadow-sm cursor-pointer">
+                <i class="fa-solid fa-upload text-blue-600"></i>
+                <span>匯入備份還原 (JSON)</span>
+                <input type="file" id="import-json-file" accept=".json" class="hidden" onchange="importAllData(event)">
+              </label>
+              <button type="button" onclick="resetAllData()" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold rounded-xl transition flex items-center gap-2 ml-auto shadow-sm">
+                <i class="fa-solid fa-rotate-left text-rose-500"></i>
+                <span>重設為系統預設資料</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 8. 我的借閱證 (User Profile) ================= -->
+      <section id="view-profile" class="hidden space-y-6">
+        <div class="max-w-2xl mx-auto space-y-6">
+          <!-- Digital Library Card -->
+          <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 text-white p-7 shadow-2xl border border-slate-700/80">
+            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="flex items-center justify-between pb-4 border-b border-slate-700/60 mb-6">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-emerald-500/30">
+                  <i class="fa-solid fa-book-bookmark"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-base tracking-wide">智慧圖書館 · 數位借閱證</h3>
+                  <p class="text-[11px] text-slate-400 font-mono">SMART LIBRARY DIGITAL PASS</p>
+                </div>
+              </div>
+              <div id="profile-status">
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">🟢 正常有效</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 items-end">
+              <div>
+                <span class="text-[11px] text-slate-400 uppercase font-semibold">讀者姓名</span>
+                <div id="profile-name" class="text-2xl font-black text-white tracking-wide mt-0.5">陳思妤</div>
+                <div class="mt-2 flex items-center gap-2">
+                  <span id="profile-type" class="text-xs font-semibold px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">學生</span>
+                  <span id="profile-notes" class="text-xs text-slate-300">資工系二年級</span>
+                </div>
+              </div>
+
+              <div class="sm:text-right font-mono">
+                <span class="text-[11px] text-slate-400 uppercase font-semibold">證件號碼 (MEMBER ID)</span>
+                <div id="profile-id" class="text-xl font-bold tracking-wider text-emerald-400 mt-0.5">MEM-2001</div>
+                <div class="text-[11px] text-slate-400 mt-1">發證日期：<span id="profile-joined">2025-09-01</span></div>
+              </div>
+            </div>
+
+            <!-- Borrow Quota Bar -->
+            <div class="mt-6 pt-5 border-t border-slate-700/60">
+              <div class="flex items-center justify-between text-xs mb-2">
+                <span class="text-slate-300 font-medium">借閱額度使用狀況</span>
+                <span class="font-bold text-white">已借 <span id="profile-borrowed" class="text-emerald-400 font-bold">1</span> / 上限 <span id="profile-limit">5</span> 本 (尚可借 <span id="profile-remaining" class="text-emerald-400 font-bold">4</span> 本)</span>
+              </div>
+              <div class="w-full h-2.5 bg-slate-700/80 rounded-full overflow-hidden p-0.5">
+                <div id="profile-bar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500" style="width: 20%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Personal Details & Quick Actions -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-address-book text-emerald-600"></i>
+              <span>聯絡與個人資料</span>
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div class="p-3 bg-slate-50 rounded-xl">
+                <span class="text-slate-400 block mb-0.5">電子信箱</span>
+                <span id="profile-email" class="font-semibold text-slate-700 font-mono">sychen@university.edu.tw</span>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-xl">
+                <span class="text-slate-400 block mb-0.5">聯絡電話</span>
+                <span id="profile-phone" class="font-semibold text-slate-700 font-mono">0912-345-678</span>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex flex-wrap gap-3">
+              <button onclick="switchTab('circulation')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20">
+                <i class="fa-solid fa-book-open"></i>
+                <span>查看我的借閱書籍</span>
+              </button>
+              <button onclick="switchTab('seats')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-chair text-emerald-600"></i>
+                <span>預約自習座位</span>
+              </button>
+              <button onclick="openLoginModal()" class="w-full sm:w-auto bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 text-xs font-semibold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>切換帳號登出</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ================= MODAL: 預約席位 (Seat Reservation) ================= -->
+  <div id="modal-seat-reserve" class="modal-backdrop hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+          <i class="fa-solid fa-chair text-emerald-600"></i>
+          <span>預約圖書館席位</span>
+        </h3>
+        <button onclick="closeSeatModal()" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+      </div>
+
+      <form id="form-seat-reserve" onsubmit="handleSeatReserveSubmit(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">選擇自習席位 <span class="text-rose-500">*</span></label>
+          <select id="reserve-seat-select" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+            <option value="">-- 請選擇欲預約席位 --</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">選擇預約讀者 <span class="text-rose-500">*</span></label>
+          <select id="reserve-member-select" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+            <option value="">-- 請選擇讀者 --</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">預約日期</label>
+          <input type="date" id="reserve-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">開始時間</label>
+            <select id="reserve-start-time" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+              <option value="08:00">08:00</option>
+              <option value="09:00" selected>09:00</option>
+              <option value="10:00">10:00</option>
+              <option value="11:00">11:00</option>
+              <option value="12:00">12:00</option>
+              <option value="13:00">13:00</option>
+              <option value="14:00">14:00</option>
+              <option value="15:00">15:00</option>
+              <option value="16:00">16:00</option>
+              <option value="17:00">17:00</option>
+              <option value="18:00">18:00</option>
+              <option value="19:00">19:00</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">使用時長</label>
+            <select id="reserve-duration" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+              <option value="1">1 小時</option>
+              <option value="2" selected>2 小時</option>
+              <option value="3">3 小時</option>
+              <option value="4">4 小時</option>
+              <option value="6">6 小時 (上限)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeSeatModal()" class="px-4 py-2 rounded-xl text-slate-500 hover:bg-slate-100 text-sm">取消</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium shadow-md shadow-emerald-600/20">確認預約</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: 新增/編輯書籍 ================= -->
+  <div id="modal-book" class="modal-backdrop hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 id="modal-book-title" class="font-bold text-slate-800 text-base">新增館藏書籍</h3>
+        <button onclick="closeBookModal()" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+      </div>
+      <form id="form-book" onsubmit="saveBook(event)" class="space-y-3.5">
+        <input type="hidden" id="book-form-id">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">書名 <span class="text-rose-500">*</span></label>
+          <input type="text" id="book-title" required placeholder="例如：原子習慣" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">作者 <span class="text-rose-500">*</span></label>
+            <input type="text" id="book-author" required placeholder="作者姓名" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">出版社</label>
+            <input type="text" id="book-publisher" placeholder="出版社名稱" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">ISBN 條碼</label>
+            <input type="text" id="book-isbn" placeholder="978-..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">書籍分類</label>
+            <select id="book-category" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+              <option value="資訊科技">資訊科技</option>
+              <option value="心理勵志">心理勵志</option>
+              <option value="商業理財">商業理財</option>
+              <option value="文學小說">文學小說</option>
+              <option value="人文歷史">人文歷史</option>
+              <option value="自然科普">自然科普</option>
+              <option value="未分類">未分類</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">出版年</label>
+            <input type="number" id="book-year" value="2024" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">館藏架號</label>
+            <input type="text" id="book-location" value="A區-01架" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">總入庫數量</label>
+            <input type="number" id="book-copies" value="3" min="1" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">摘要簡介</label>
+          <textarea id="book-desc" rows="2" placeholder="簡短內容或導讀..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeBookModal()" class="px-4 py-2 rounded-xl text-slate-500 hover:bg-slate-100 text-sm">取消</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium shadow-md shadow-emerald-600/20">儲存書籍</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: 新增/編輯讀者 ================= -->
+  <div id="modal-member" class="modal-backdrop hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 id="modal-member-title" class="font-bold text-slate-800 text-base">辦理讀者借閱證</h3>
+        <button onclick="closeMemberModal()" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+      </div>
+      <form id="form-member" onsubmit="saveMember(event)" class="space-y-3.5">
+        <input type="hidden" id="member-form-id">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">姓名 <span class="text-rose-500">*</span></label>
+          <input type="text" id="member-name" required placeholder="例如：王小明" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">身份類別</label>
+            <select id="member-type" onchange="adjustDefaultLimit()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+              <option value="學生">學生 (上限5本)</option>
+              <option value="教職員">教職員 (上限10本)</option>
+              <option value="一般讀者">一般讀者 (上限3本)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">可借上限 (本)</label>
+            <input type="number" id="member-limit" value="5" min="1" max="20" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">電子郵件</label>
+          <input type="email" id="member-email" placeholder="example@mail.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">聯絡電話</label>
+          <input type="text" id="member-phone" placeholder="0912-345-678" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+        </div>
+        <div id="member-status-group" class="hidden">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">借閱證狀態</label>
+          <select id="member-status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+            <option value="active">正常有效</option>
+            <option value="suspended">暫停使用 (停權)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">備註資訊 (系所/職稱等)</label>
+          <input type="text" id="member-notes" placeholder="例如：資工系一年級" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+        </div>
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeMemberModal()" class="px-4 py-2 rounded-xl text-slate-500 hover:bg-slate-100 text-sm">取消</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium shadow-md shadow-emerald-600/20">儲存資料</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: 身分登入與切換 (Login & Role Switcher) ================= -->
+  <div id="modal-auth-login" class="modal-backdrop hidden fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-xl shadow-lg shadow-emerald-600/20 font-bold">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-lg">智慧圖書館 · 身分登入</h3>
+            <p class="text-xs text-slate-400">區分【系統管理者】與【各讀者使用者】專屬權限</p>
+          </div>
+        </div>
+        <button id="btn-close-login-modal" onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1 rounded-lg">&times;</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="form-auth-login" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">登入帳號 (管理者或讀者證號)</label>
+          <div class="relative">
+            <i class="fa-regular fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="text" id="login-account" required placeholder="管理者輸入 1323 或 ming / 讀者輸入證號如 MEM-2001" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">登入密碼</label>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="password" id="login-password" required placeholder="管理者密碼 1323 / 讀者密碼 1234" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-md shadow-emerald-600/25 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i>
+          <span>登入系統</span>
+        </button>
+      </form>
+
+      <!-- Quick Fast Login Cards -->
+      <div class="pt-4 border-t border-slate-100 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-600">⚡ 快捷一鍵切換登入 (測試展示推薦)</span>
+          <span class="text-[10px] text-slate-400">點擊即可立即登入體驗</span>
+        </div>
+
+        <!-- Admin Card -->
+        <div onclick="loginAs('admin', 'ming')" class="cursor-pointer group p-3.5 rounded-2xl bg-amber-50/70 hover:bg-amber-100/80 border border-amber-200/80 transition flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-lg shadow-sm">
+              👑
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-sm text-slate-900">管理者 ming</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 font-bold">帳號/密碼: 1323</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">擁有所有權限：全館統計、藏書管理、讀者名冊、座位管理、營運參數</p>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-amber-600 group-hover:translate-x-1 transition text-sm"></i>
+        </div>
+
+        <!-- Users List -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <!-- User 1 -->
+          <div onclick="loginAs('user', 'MEM-2001')" class="cursor-pointer group p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/70 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-xs">
+                陳
+              </div>
+              <div>
+                <div class="font-bold text-xs text-slate-800">陳思妤 <span class="text-[10px] font-normal text-slate-400">(學生)</span></div>
+                <div class="text-[10px] text-slate-500 font-mono">MEM-2001 · 密碼: 1234</div>
+              </div>
+            </div>
+            <span class="text-[11px] text-emerald-600 font-semibold group-hover:underline">登入 &rarr;</span>
+          </div>
+
+          <!-- User 2 -->
+          <div onclick="loginAs('user', 'MEM-2002')" class="cursor-pointer group p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/70 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs">
+                林
+              </div>
+              <div>
+                <div class="font-bold text-xs text-slate-800">林浩然 <span class="text-[10px] font-normal text-slate-400">(教職員)</span></div>
+                <div class="text-[10px] text-slate-500 font-mono">MEM-2002 · 借書上限10冊</div>
+              </div>
+            </div>
+            <span class="text-[11px] text-emerald-600 font-semibold group-hover:underline">登入 &rarr;</span>
+          </div>
+
+          <!-- User 3 -->
+          <div onclick="loginAs('user', 'MEM-2005')" class="cursor-pointer group p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/70 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-xs">
+                李
+              </div>
+              <div>
+                <div class="font-bold text-xs text-slate-800">李欣穎 <span class="text-[10px] font-normal text-slate-400">(學生)</span></div>
+                <div class="text-[10px] text-slate-500 font-mono">MEM-2005 · 目前0本借閱</div>
+              </div>
+            </div>
+            <span class="text-[11px] text-emerald-600 font-semibold group-hover:underline">登入 &rarr;</span>
+          </div>
+
+          <!-- User 4 -->
+          <div onclick="loginAs('user', 'MEM-2004')" class="cursor-pointer group p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/70 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center text-xs">
+                黃
+              </div>
+              <div>
+                <div class="font-bold text-xs text-slate-800">黃國豪 <span class="text-[10px] font-normal text-slate-400">(一般讀者)</span></div>
+                <div class="text-[10px] text-slate-500 font-mono">MEM-2004 · 社區讀者</div>
+              </div>
+            </div>
+            <span class="text-[11px] text-emerald-600 font-semibold group-hover:underline">登入 &rarr;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Scripts -->
+  <script src="./js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "maxBorrowDays": 14,
+  "maxBooksPerMember": 5,
+  "finePerDay": 5,
+  "systemName": "智慧圖書館管理系統",
+  "enableFine": true
+}

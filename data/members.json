@@ -1,0 +1,62 @@
+[
+  {
+    "id": "MEM-2001",
+    "name": "陳思妤",
+    "type": "學生",
+    "email": "sychen@university.edu.tw",
+    "phone": "0912-345-678",
+    "status": "active",
+    "joinedDate": "2025-09-01",
+    "currentBorrowed": 1,
+    "maxBorrowLimit": 5,
+    "notes": "資工系二年級"
+  },
+  {
+    "id": "MEM-2002",
+    "name": "林浩然",
+    "type": "教職員",
+    "email": "hrlin@university.edu.tw",
+    "phone": "0923-456-789",
+    "status": "active",
+    "joinedDate": "2024-03-10",
+    "currentBorrowed": 1,
+    "maxBorrowLimit": 10,
+    "notes": "圖書資訊處助理教授"
+  },
+  {
+    "id": "MEM-2003",
+    "name": "張雅筑",
+    "type": "學生",
+    "email": "ycchang@university.edu.tw",
+    "phone": "0934-567-890",
+    "status": "active",
+    "joinedDate": "2025-10-12",
+    "currentBorrowed": 1,
+    "maxBorrowLimit": 5,
+    "notes": "外文系三年級"
+  },
+  {
+    "id": "MEM-2004",
+    "name": "黃國豪",
+    "type": "一般讀者",
+    "email": "guohao.huang@gmail.com",
+    "phone": "0956-789-012",
+    "status": "active",
+    "joinedDate": "2026-01-05",
+    "currentBorrowed": 1,
+    "maxBorrowLimit": 3,
+    "notes": "社區居民證"
+  },
+  {
+    "id": "MEM-2005",
+    "name": "李欣穎",
+    "type": "學生",
+    "email": "hsinying.lee@university.edu.tw",
+    "phone": "0967-890-123",
+    "status": "active",
+    "joinedDate": "2026-02-20",
+    "currentBorrowed": 0,
+    "maxBorrowLimit": 5,
+    "notes": "企管系一年級"
+  }
+]
